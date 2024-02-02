@@ -1,72 +1,47 @@
-import React, { useState } from 'react';
-import './style.css';
+import React, { useContext, useState } from 'react';
 import Logo from '../../../assets/logo.svg';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../../../Context/AuthContext.jsx';
+import { RestaurantContext } from '../../../Context/RestaurantContext.jsx';
+import { toast } from 'react-toastify';
 
 const Login = () => {
+  const { login } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const { fetchRestaurants } = useContext(RestaurantContext);
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
     try {
-      const response = await axios.post('http://localhost:8000/api/login', {
-        email,
-        password
-      });
-      console.log('Login bem sucedido!', response.data);
-
-      const token = localStorage.setItem('token', response.data.token);
-
-      navigate('/dashboard')
+      await login(email, password);
+        fetchRestaurants();
+        navigate('/dashboard');
     } catch (error) {
-      console.log('Falha no login', error);
+      console.log('Email ou senha incorretos');
     }
   };
 
   return (
-    <div className="container-login">
-      <div className="wrap-login">
-        <form className="login-form" onSubmit={handleLogin}>
-          <span className="login-form-title">Logar</span>
-          <span className="login-form-title">
-            <img src={Logo} alt="Logo grão direto" />
-          </span>
-
-          <div className="wrap-input">
-            <input
-              className="input"
-              type="email"
-              placeholder="Insira o email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <label htmlFor="email" className="focus-input"></label>
+    <div className="bg-[#adadad] min-h-screen flex items-center justify-center">
+      <div className="bg-white rounded-md shadow-md p-8 max-w-md md:w-full w-[95%]">
+        <div className="text-center">
+          <img src={Logo} alt="grão direto logo" className="w-32 mx-auto" />
+          <h1 className="text-2xl font-bold text-gray-800">Login</h1>
+        </div>
+        <form onSubmit={handleLogin} className="space-y-4 mt-6">
+          <div>
+            <label htmlFor="email" className="block text-gray-700 font-semibold">Email</label>
+            <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-300 focus:ring-opacity-50" required />
           </div>
-
-          <div className="wrap-input">
-            <input
-              className="input"
-              type="password"
-              placeholder="Insira a password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <label htmlFor="password" className="focus-input"></label>
+          <div>
+            <label htmlFor="password" className="block text-gray-700 font-semibold">Password</label>
+            <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-yellow-500 focus:ring focus:ring-yellow-300 focus:ring-opacity-50" required />
           </div>
-
-          <div className="container-login-form-btn">
-            <button className="login-form-btn">Login</button>
-          </div>
-
-          <div className="have-not-account">
-            <span className="span-account">Não possui conta?</span>
-            <Link to="/register" className="register-account">Criar conta</Link>
-          </div>
+          <button type="submit" className="w-full bg-yellow-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-yellow-600 focus:outline-none focus:bg-yellow-600">Login</button>
         </form>
+        <p className="text-sm text-gray-600 text-center mt-4">Don't have an account? <Link to="/register" className="text-yellow-500 font-semibold">Create an account</Link></p>
       </div>
     </div>
   );
